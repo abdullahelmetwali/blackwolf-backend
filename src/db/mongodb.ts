@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DB_URI } from "../config/env";
+import { DB_URI } from "@/config/env";
 
 const CONNECT_TO_DATA_BASE = async () => {
     if (!DB_URI) {
@@ -10,7 +10,7 @@ const CONNECT_TO_DATA_BASE = async () => {
         await mongoose.connect(DB_URI);
         console.log("connected to db now")
     } catch (error) {
-        console.log(error)
+        console.log(`Error connecting to Database : ${error}`)
     }
 };
 

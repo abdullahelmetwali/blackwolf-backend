@@ -8,7 +8,7 @@ import CONNECT_TO_DATA_BASE from "./db/mongodb";
 import USERS_ROUTE from "./routes/users.route";
 import AUTH_ROUTE from "./routes/auth.route";
 
-import ERROR_MIDDLEWARE from "./middlewares/error.middleware";
+import { ERROR_MIDDLEWARE } from "./middlewares/error.middleware";
 
 const app = express();
 app.use(express.json());

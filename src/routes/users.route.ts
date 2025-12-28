@@ -1,4 +1,4 @@
-import USER from "@/models/users.model";
+import { USERS } from "@/models/users.model";
 import { Router } from "express";
 
 const USERS_ROUTE = Router();
@@ -8,12 +8,13 @@ const USERS_ROUTE = Router();
 
 USERS_ROUTE.get("/", async (req, res) => {
     try {
-        const users = await USER.find({}, { password: 0 }).lean(); // .lean() -> plain JS objects
+        // .lean() -> plain JS objects
+        const users = await USERS.find({}, { password: 0 }).lean();
 
         res.json({
             success: true,
             message: "GET all users",
-            data: users,          // no need for [ ... ] here unless you really want an array of arrays
+            data: users,
         });
     } catch (error: Error | any) {
         res.status(500).json({

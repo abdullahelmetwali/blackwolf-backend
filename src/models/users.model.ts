@@ -1,12 +1,20 @@
-import { Schema, model } from "mongoose";
+import { PreSaveMiddlewareFunction, Schema, model } from "mongoose";
+import slugify from "slugify";
 
-const userScheme = new Schema({
+const USER_SCHEME = new Schema({
+    slug: {
+        type: String,
+        unique: true,
+        lowercase: true,
+        index: true,
+        trim: true,
+    },
     name: {
         type: String,
-        required: [true, "name is required"],
         trim: true,
-        minLength: 8,
-        maxLength: 200
+        required: [true, "Name is required"],
+        minlength: [12, "Name length must be more than 12 letters"],
+        maxlength: [200, "Name length must be less than 200 letters"],
     },
     email: {
         type: String,
@@ -19,11 +27,8 @@ const userScheme = new Schema({
     password: {
         type: String,
         trim: true,
-        minLength: 8,
-        validate: {
-            validator: (value: string) => value.length > 8,
-            message: "Password must be greater then 8 letters"
-        }
+        required: [true, "Password is required"],
+        minlength: [12, "Password length must be more than 12 letters"],
     },
     gender: {
         type: String,
@@ -39,5 +44,33 @@ const userScheme = new Schema({
     }
 });
 
-const USER = model("User", userScheme);
-export default USER;
+USER_SCHEME.pre("save", async function () {
+    if (this.isNew || this.isModified("name")) {
+        try {
+            const slugOptions = {
+                lower: true,
+                strict: true,
+                trim: true,
+                locale: "en"
+            };
+
+            let slug = slugify(this.name, slugOptions);
+
+            let isSlugExists = await USERS.findOne({ slug });
+            let counter = 1;
+
+            // if slug exists make this loop
+            while (isSlugExists) {
+                slug = `${slugify(this.name, slugOptions)}-${counter}`;
+                isSlugExists = await USERS.findOne({ slug });
+                counter++;
+            };
+
+            this.slug = slug;
+        } catch (error) {
+        }
+    }
+})
+
+const USERS = model("User", USER_SCHEME);
+export { USERS };
