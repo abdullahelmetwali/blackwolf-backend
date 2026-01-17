@@ -25,6 +25,10 @@ app.use(cookiesParser());
             allowedHeaders: ['Content-Type', 'Authorization'], // headers that you need to pass
         }));
 
+        app.get("/", (req, res) => res.json({
+            message: "Hi this is the root"
+        }));
+
         app.use("/api/v1/users", USERS_ROUTE);
         app.use("/api/v1/auth", AUTH_ROUTE);
 
