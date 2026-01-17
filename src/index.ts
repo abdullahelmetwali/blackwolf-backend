@@ -30,9 +30,9 @@ app.use(cookiesParser());
 
         app.use(ERROR_MIDDLEWARE);
 
-        app.listen(PORT, () => {
-            console.log(`server is running on ${PORT}`);
-        });
+        // app.listen(PORT, () => {
+        //     console.log(`server is running on ${PORT}`);
+        // });
     } catch (error) {
         console.error("Failed to connect to DB. Server not started.", error);
         process.exit(1);
