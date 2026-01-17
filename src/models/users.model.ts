@@ -1,4 +1,4 @@
-import { PreSaveMiddlewareFunction, Schema, model } from "mongoose";
+import { Schema, model } from "mongoose";
 import slugify from "slugify";
 
 const USER_SCHEME = new Schema({
@@ -56,13 +56,13 @@ USER_SCHEME.pre("save", async function () {
 
             let slug = slugify(this.name, slugOptions);
 
-            let isSlugExists = await USERS.findOne({ slug });
+            let isSlugExists = await USERS_MODEL.findOne({ slug });
             let counter = 1;
 
             // if slug exists make this loop
             while (isSlugExists) {
                 slug = `${slugify(this.name, slugOptions)}-${counter}`;
-                isSlugExists = await USERS.findOne({ slug });
+                isSlugExists = await USERS_MODEL.findOne({ slug });
                 counter++;
             };
 
@@ -70,7 +70,14 @@ USER_SCHEME.pre("save", async function () {
         } catch (error) {
         }
     }
-})
+});
+interface UserTypo {
+    slug: string;
+    name: string;
+    email: string;
+    password: string;
+    gender: "male" | "female";
+};
 
-const USERS = model("User", USER_SCHEME);
-export { USERS };
+const USERS_MODEL = model("User", USER_SCHEME);
+export { USERS_MODEL, type UserTypo };

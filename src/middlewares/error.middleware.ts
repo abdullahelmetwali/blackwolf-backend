@@ -3,9 +3,9 @@ import { Request, Response, NextFunction } from "express";
 
 export function ERROR_MIDDLEWARE(
     err: any,
-    req: Request,
+    _: Request,
     res: Response,
-    next: NextFunction
+    __: NextFunction
 ) {
     try {
         let statusCode = err.statusCode || 500;
