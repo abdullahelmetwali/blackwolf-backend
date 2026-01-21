@@ -1,7 +1,7 @@
 import { makeSlug } from "@/utils/make-slug";
 import { Schema, model } from "mongoose";
 
-const USER_SCHEMA = new Schema({
+const UserSchema = new Schema({
     slug: {
         type: String,
         unique: true,
@@ -34,15 +34,19 @@ const USER_SCHEMA = new Schema({
         type: String,
         enum: ["male", "female"],
         required: false
+    },
+    cart: {
+        type: [],
+        default: []
     }
 }, {
     timestamps: true,
+    versionKey: false
 });
 
-USER_SCHEMA.pre("save", async function () {
+UserSchema.pre("save", async function () {
     if (!this.isNew && !this.isModified("name")) return;
     this.slug = await makeSlug(this.name, this.constructor);
 });
 
-
-export const USERS_MODEL = model("Users", USER_SCHEMA);
+export const USERS_MODEL = model("Users", UserSchema);

@@ -8,7 +8,10 @@ import { ERROR_MIDDLEWARE } from "@/middlewares/error.middleware";
 
 import USERS_ROUTE from "@/routes/users.route";
 import AUTH_ROUTE from "@/routes/auth.route";
+
 import PRODUCTS_ROUTE from "@/routes/products.route";
+import INVENTORY_ROUTE from "@/routes/inventory.route";
+import CATEGORIES_ROUTE from "@/routes/categories.route";
 import SIZES_ROUTE from "@/routes/sizes.route";
 import COLORS_ROUTE from "@/routes/colors.route";
 
@@ -22,7 +25,7 @@ app.use(cookieParser());
 app.use(
     cors({
         origin: ["http://localhost:3000", "domain"],
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
         allowedHeaders: ["Content-Type", "Authorization"],
     })
 );
@@ -36,6 +39,9 @@ app.use("/api/v1/auth", AUTH_ROUTE);
 app.use("/api/v1/users", USERS_ROUTE);
 
 app.use("/api/v1/products", PRODUCTS_ROUTE);
+app.use("/api/v1/inventory", INVENTORY_ROUTE);
+
+app.use("/api/v1/categories", CATEGORIES_ROUTE);
 app.use("/api/v1/sizes", SIZES_ROUTE);
 app.use("/api/v1/colors", COLORS_ROUTE);
 

@@ -16,6 +16,7 @@ export const createColor = async (req: Request, res: Response, next: NextFunctio
             if (isExsits.isDeleted) throw new Error("This color is deleted , check it");
 
             const errors = {
+                ...(isExsits.isDeleted ? { name: "This color is deleted , check it" } : {}),
                 ...(isExsits.name && name ? { name: "This name already exists" } : {}),
                 ...(isExsits.value && value ? { value: "This value already exists" } : {}),
             };

@@ -1,25 +1,52 @@
 import { NextFunction, Request, Response } from "express";
 import { startSession } from "mongoose";
 
-import { CustomValidationError } from "@/classes";
-import { PRODUCTS_MODEL } from "@/models/products.model";
 import { ProductTypo } from "@/types";
+import { CustomValidationError } from "@/classes";
+
+import { PRODUCTS_MODEL } from "@/models/products.model";
+import { COLORS_MODEL } from "@/models/colors.model";
+import { SIZES_MODEL } from "@/models/sizes.model";
+import { CATEGORIES_MODEL } from "@/models/categories.model";
+
+import { softDeleteUtility } from "@/utils/soft-delete";
+import { hardDeleteUtility } from "@/utils/hard-delete";
+import { restoreUtility } from "@/utils/restore";
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
     const session = await startSession();
     session.startTransaction();
     try {
-        const body: ProductTypo = req.body;
-        const name = body.name;
-        const isExsits = await PRODUCTS_MODEL.exists({ name });
+        const { name, colors, sizes, categories, status } = req.body as ProductTypo;
 
-        if (isExsits) {
-            const err = new CustomValidationError(404, { name: "This name has been applied in another product" });
-            throw err;
+        const [anotherProduct, hasColors, hasSizes, hasCategories] = await Promise.all([
+            PRODUCTS_MODEL.findOne({ name: name }).session(session),
+            COLORS_MODEL.find({ _id: { $in: colors }, isDeleted: false }).select("_id").session(session),
+            SIZES_MODEL.find({ _id: { $in: sizes }, isDeleted: false }).select("_id").session(session),
+            CATEGORIES_MODEL.find({ _id: { $in: categories }, isDeleted: false }).select("_id").session(session),
+        ]);
+
+        let errors: Record<string, string> = {};
+
+        if (anotherProduct) {
+            if (anotherProduct.isDeleted) {
+                errors.name = "This name exists in a deleted product, check it";
+            } else {
+                errors.name = "This name exists in another product";
+            }
+        };
+        if (status !== "0" && status !== "1") errors.status = "Status must be published or draft";
+
+        if (hasColors.length !== colors?.length) errors.colors = "Color ID does not exist";
+        if (hasSizes.length !== sizes?.length) errors.sizes = "Size ID does not exist";
+        if (hasCategories.length !== categories?.length) errors.categories = "Category ID does not exist";
+
+        if (Object.keys(errors).length > 0) {
+            throw new CustomValidationError(409, errors);
         };
 
         const newProduct = await PRODUCTS_MODEL.create(
-            [{ ...body }],
+            [{ ...req.body }],
             { session }
         );
 
@@ -30,12 +57,114 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         await session.commitTransaction();
 
         return res.status(201).json({
-            ...newProduct[0],
+            ...newProduct[0].toObject(),
         });
     } catch (error) {
-        await session.abortTransaction();
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
         next(error);
     } finally {
         session.endSession();
     }
+};
+
+export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
+    const session = await startSession();
+    session.startTransaction();
+    try {
+        const { id } = req.params;
+        const { name, colors, sizes, categories, status } = req.body as ProductTypo;
+
+        const thisProduct = await PRODUCTS_MODEL.findById(id).session(session);
+        if (!thisProduct) {
+            throw new Error("Product not found");
+        };
+
+        const [anotherProduct, hasColors, hasSizes, hasCategories] = await Promise.all([
+            PRODUCTS_MODEL.findOne({ _id: { $ne: id }, name: name }).session(session),
+            COLORS_MODEL.find({ _id: { $in: colors }, isDeleted: false }).select("_id").session(session),
+            SIZES_MODEL.find({ _id: { $in: sizes }, isDeleted: false }).select("_id").session(session),
+            CATEGORIES_MODEL.find({ _id: { $in: categories }, isDeleted: false }).select("_id").session(session),
+        ]);
+
+        let errors: Record<string, string> = {};
+
+        if (anotherProduct) {
+            if (anotherProduct.isDeleted) {
+                errors.name = "This name exists in a deleted product, check it";
+            } else {
+                errors.name = "This name exists in another product";
+            }
+        };
+
+        if (status !== "0" && status !== "1") errors.status = "Status must be published or draft";
+
+        if (hasColors.length !== colors?.length) errors.colors = "Color ID does not exist";
+        if (hasSizes.length !== sizes?.length) errors.sizes = "Size ID does not exist";
+        if (hasCategories.length !== categories?.length) errors.categories = "Category ID does not exist";
+
+        if (Object.keys(errors).length > 0) {
+            throw new CustomValidationError(409, errors);
+        };
+
+        // updating 
+        thisProduct.name = name;
+        thisProduct.status = status;
+
+        thisProduct.colors = colors;
+        thisProduct.sizes = sizes;
+        thisProduct.categories = categories;
+
+        await thisProduct.save();
+        await session.commitTransaction();
+
+        return res.status(201).json(thisProduct.toObject());
+    } catch (error) {
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
+        next(error);
+    } finally {
+        session.endSession();
+    }
+};
+
+export const softDeleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const softDeleted = await softDeleteUtility(id as string, PRODUCTS_MODEL, "product");
+        return res.status(200).json({
+            message: `${softDeleted.name} soft deleted successfully`
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const hardDeleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const hardDeleted = await hardDeleteUtility(id as string, PRODUCTS_MODEL, "product");
+        return res.status(200).json({
+            message: `${hardDeleted.name} deleted forever successfully`
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const restoreProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+
+        const restored = await restoreUtility(id as string, PRODUCTS_MODEL, "product");
+        return res.status(200).json({
+            message: `${restored.name} restored successfully`
+        });
+    } catch (error) {
+        next(error);
+    };
 };

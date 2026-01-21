@@ -15,10 +15,11 @@ export function ERROR_MIDDLEWARE(
         console.log("from error middlware");
         console.log(err);
 
-        // invalid id format => CastError
+        // invalid id format => CastError 
+        // the id entered not like mongoose id => 12 byte ( 12 characters )
         if (err.name === "CastError") {
             statusCode = 404;
-            message = "Resource not found";
+            message = `Invalid ${err.path} format entered`;
         }
 
         // duplicate error 

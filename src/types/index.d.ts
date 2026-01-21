@@ -16,7 +16,10 @@ export interface ProductTypo {
     description: string,
     image: string,
     colors: string[];
-    category: string;
+    categories: string[];
     sizes: string[];
     price: number;
+    oldPrice?: number,
+    discount?: number,
+    status: "0" | "1"
 };
