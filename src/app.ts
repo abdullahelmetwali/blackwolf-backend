@@ -1,4 +1,4 @@
-import 'tsconfig-paths/register';
+import "./config/env";
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
