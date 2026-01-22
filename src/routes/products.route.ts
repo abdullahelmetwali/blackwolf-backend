@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { PRODUCTS_MODEL } from "../models/products.model";
+import { PRODUCTS_MODEL } from "@/models/products.model";
 import { createProduct, hardDeleteProduct, restoreProduct, softDeleteProduct, updateProduct } from "../controllers/products.controller";
 
 const PRODUCTS_ROUTE = Router();
