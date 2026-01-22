@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { COLORS_MODEL } from "@/models/colors.model";
+import { COLORS_MODEL } from "../models/colors.model";
 import { createColor, hardDeleteColor, restoreColor, softDeleteColor, updateColor } from "@/controllers/colors.controller";
 
 const COLORS_ROUTE = Router();

@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { SIZES_MODEL } from "@/models/sizes.model";
+import { SIZES_MODEL } from "../models/sizes.model";
 import { createSize, updateSize, restoreSize, softDeleteSize, hardDeleteSize } from "../controllers/sizes.controller";
 
 const SIZES_ROUTE = Router();
