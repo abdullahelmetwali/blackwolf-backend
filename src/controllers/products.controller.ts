@@ -13,6 +13,25 @@ import { softDeleteUtility } from "../utils/soft-delete";
 import { hardDeleteUtility } from "../utils/hard-delete";
 import { restoreUtility } from "../utils/restore";
 
+export const filterProucts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { category, size, color, price, status } = req.query;
+        const filter: Record<string, any> = { isDeleted: false };
+
+        if (category) filter.categories = category;
+        if (size) filter.sizes = size;
+        if (color) filter.colors = color;
+        if (status) filter.status = status;
+
+        const products = await PRODUCTS_MODEL.find(filter).lean();
+        return res.json({
+            data: products
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
     const session = await startSession();
     session.startTransaction();

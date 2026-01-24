@@ -3,6 +3,7 @@ import { Router } from "express";
 import { AUTH_MIDDLEWARE } from "../middlewares/auth.middleware";
 import { PRODUCTS_MODEL } from "../models/products.model";
 import {
+    filterProucts,
     createProduct,
     hardDeleteProduct,
     restoreProduct,
@@ -13,18 +14,7 @@ import {
 const PRODUCTS_ROUTE = Router();
 
 // all products (not deleted) 
-PRODUCTS_ROUTE.get("/", async (_, res) => {
-    try {
-        const products = await PRODUCTS_MODEL.find({ isDeleted: false, }).lean();
-        return res.json({
-            data: products
-        })
-    } catch (error: Error | any) {
-        return res.json({
-            error: error?.message
-        })
-    }
-});
+PRODUCTS_ROUTE.get("/", filterProucts);
 
 // deleted products
 PRODUCTS_ROUTE.get("/deleted", AUTH_MIDDLEWARE, async (_, res) => {
