@@ -22,7 +22,6 @@ SIZES_ROUTE.get("/", async (_, res) => {
         return res.status(200).json({ data: sizes });
     } catch (error: Error | any) {
         res.status(500).json({
-            success: false,
             error: error.message,
         });
     }
@@ -42,7 +41,6 @@ SIZES_ROUTE.get("/deleted", AUTH_MIDDLEWARE, async (_, res) => {
         })
     } catch (error: Error | any) {
         res.status(500).json({
-            success: false,
             error: error.message,
         });
     }

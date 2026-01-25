@@ -5,6 +5,7 @@ import { CATEGORIES_MODEL } from "../models/categories.model";
 import { softDeleteUtility } from "../utils/soft-delete";
 import { hardDeleteUtility } from "../utils/hard-delete";
 import { restoreUtility } from "../utils/restore";
+import { GET_USER } from "../utils/get-user";
 
 export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -63,7 +64,11 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
 export const softDeleteCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const softDeleted = await softDeleteUtility(id as string, CATEGORIES_MODEL as any, "category");
+
+        const userDeletedProduct = await GET_USER(req);
+        if (userDeletedProduct instanceof Error) throw new Error(userDeletedProduct.message);
+
+        const softDeleted = await softDeleteUtility(id as string, CATEGORIES_MODEL as any, "category", userDeletedProduct);
 
         return res.status(200).json({
             message: `${softDeleted.name} soft deleted successfully`

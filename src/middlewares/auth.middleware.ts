@@ -1,39 +1,28 @@
-import { JWT_SECRET } from "../config/env";
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { GET_USER } from "../utils/get-user";
 
-export function AUTH_MIDDLEWARE(
+export async function AUTH_MIDDLEWARE(
     req: Request,
     res: Response,
     next: NextFunction
 ) {
     try {
-        const token = req.header("Authorization")?.split(" ")[1];
-
-        if (!token) {
+        const user = await GET_USER(req);
+        if (user instanceof Error) {
             return res.status(401).json({
-                message: "Unauthorized"
-            })
+                message: user?.message
+            });
         };
 
-        jwt.verify(token, JWT_SECRET as string, (err, decoded) => {
-            if (err) {
-                return res.status(401).json({
-                    message: "Unauthorized and invalid token"
-                })
-            };
+        const userRole = user.role;
 
-            const decodedToken = decoded as any;
-            const userRole = decodedToken?.role;
+        if (userRole !== "admin") {
+            return res.status(403).json({
+                message: "Forbidden: You do not have permission to access this resource"
+            });
+        }
 
-            if (userRole !== "admin") {
-                return res.status(401).json({
-                    message: "Unauthorized, dont have permission"
-                })
-            }
-
-            next();
-        });
+        next();
 
     } catch (error) {
         return res.status(500).json({

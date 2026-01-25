@@ -51,35 +51,52 @@ const ProductSchema = new Schema({
             validator: (v: Number | String) => Number(v),
         },
     },
+    reviews: {
+        type: [
+            {
+                user: { type: String, required: true },
+                rating: { type: Number, min: 1, max: 5, required: true },
+                comment: { type: String, default: "" },
+                createdAt: { type: Date, default: Date.now() }
+            }
+        ],
+        default: []
+    },
     image: {
         type: String
     },
     categories: {
-        type: [String],
-        set: (v: string | string[]) => Array.isArray(v) ? v : [v],
+        type: [{ _id: { type: String }, name: { type: String } }],
+        set: (v: string) => Array.isArray(v) ? v : [v],
         validate: {
-            validator: (v: string[]) => v.length > 0,
+            validator: (v: any[]) => v.length > 0,
             message: "At least choose one category"
         },
         required: true
     },
     sizes: {
-        type: [String],
+        type: [{ _id: { type: String }, name: { type: String } }],
         set: (v: string | string[]) => Array.isArray(v) ? v : [v],
         validate: {
-            validator: (v: string[]) => v.length > 0,
+            validator: (v: any[]) => v.length > 0,
             message: "At least choose one size"
         },
         required: true
     },
     colors: {
-        type: [String],
+        type: [{ _id: { type: String }, name: { type: String } }],
         set: (v: string | string[]) => Array.isArray(v) ? v : [v],
         validate: {
-            validator: (v: string[]) => v.length > 0,
+            validator: (v: any[]) => v.length > 0,
             message: "At least choose one color"
         },
         required: true
+    },
+    status: {
+        type: String,
+        enum: ["0", "1"],
+        default: "1",
+        required: [true, "Product status must be added"]
     },
     isDeleted: {
         type: Boolean,
@@ -89,16 +106,18 @@ const ProductSchema = new Schema({
         type: Date,
         default: null
     },
-    addedToCart: {
-        type: Boolean,
-        default: false
-    },
-    status: {
+    deletedBy: {
         type: String,
-        enum: ["0", "1"],
-        default: "1",
-        required: [true, "Product status must be added"]
-    }
+        default: null
+    },
+    createdBy: {
+        type: String,
+        default: null
+    },
+    updatedBy: {
+        type: String,
+        default: null
+    },
 }, {
     timestamps: true,
     versionKey: false,

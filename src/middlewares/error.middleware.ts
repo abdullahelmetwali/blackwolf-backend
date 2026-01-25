@@ -37,11 +37,11 @@ export function ERROR_MIDDLEWARE(
 
         // validation errors comes from => Scheme ( model )
         if (err.name === "ValidationError") {
-            statusCode = 400;
+            statusCode = 409;
             message = "Validation failed";
             errors = {};
 
-            // Transform validation errors into field-specific messages
+            // make every error key to his error value
             Object.keys(err.errors).forEach((key) => {
                 errors![key] = err.errors[key].message;
             });
@@ -67,7 +67,6 @@ export function ERROR_MIDDLEWARE(
 
         // response structure
         const response: any = {
-            success: false,
             message,
         };
 
@@ -80,7 +79,6 @@ export function ERROR_MIDDLEWARE(
     } catch (error) {
         // Fallback error response
         res.status(500).json({
-            success: false,
             message: "Internal server error",
         });
     }

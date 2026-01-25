@@ -10,29 +10,32 @@ import { USERS_MODEL } from "../models/users.model";
 
 export const signUp = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { email, name, password } = req.body as UserTypo;
+        const { email, name, password, phone, role } = req.body as UserTypo;
 
         // check if user exists , to avoid making the whole logic
         const isExisting = await USERS_MODEL.findOne({ email });
-        const passswordLength = password.length < 8;
+        const passswordLength = password.length < 12;
 
-        if (isExisting) {
-            const err = new CustomValidationError(409, { email: "Email is already token" });
-            throw err;
-        };
+        let errors: Record<string, string> = {};
 
-        if (passswordLength) {
-            throw new CustomValidationError(409, { password: "Password must be more than 12 letters" });
-        };
+        if (isExisting?.email) errors.email = "Email is already token";
+        if (passswordLength) errors.password = "Password must be more than 12 letters";
+
+        if (Object.keys(errors).length > 0) {
+            throw new CustomValidationError(409, errors);
+        }
 
         // hash passsword for security
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create user , here mongoose will also validate (required, minlength, etc.)
-        const newUser = await USERS_MODEL.create(
-            { name, email, password: hashedPassword }
-        );
+        const newUser = await USERS_MODEL.create({
+            name: name,
+            email: email,
+            phone: String(phone),
+            role: role,
+            password: hashedPassword
+        });
 
         if (!newUser || !JWT_SECRET || !JWT_EXPIRES_IN) {
             throw new Error("User creation failed");
@@ -45,14 +48,17 @@ export const signUp = async (req: Request, res: Response, next: NextFunction) =>
             { expiresIn: Number(JWT_EXPIRES_IN) || 3600 }
         );
 
+        const userObject = newUser.toObject();
+        delete (userObject as any).password;
+
         return res.status(201).json({
-            success: true,
             message: "User created successfully",
             data: {
                 token,
-                user: newUser
+                user: userObject
             }
-        })
+        });
+
     } catch (error) {
         next(error);
     }

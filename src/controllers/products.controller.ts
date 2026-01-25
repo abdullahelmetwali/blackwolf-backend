@@ -9,6 +9,7 @@ import { COLORS_MODEL } from "../models/colors.model";
 import { SIZES_MODEL } from "../models/sizes.model";
 import { CATEGORIES_MODEL } from "../models/categories.model";
 
+import { GET_USER } from "../utils/get-user";
 import { softDeleteUtility } from "../utils/soft-delete";
 import { hardDeleteUtility } from "../utils/hard-delete";
 import { restoreUtility } from "../utils/restore";
@@ -38,9 +39,9 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
         const [anotherProduct, hasColors, hasSizes, hasCategories] = await Promise.all([
             PRODUCTS_MODEL.findOne({ name: name }).session(session),
-            COLORS_MODEL.find({ _id: { $in: colors }, isDeleted: false }).select("_id").session(session),
-            SIZES_MODEL.find({ _id: { $in: sizes }, isDeleted: false }).select("_id").session(session),
-            CATEGORIES_MODEL.find({ _id: { $in: categories }, isDeleted: false }).select("_id").session(session),
+            COLORS_MODEL.find({ _id: { $in: colors }, isDeleted: false }).select("_id name").session(session),
+            SIZES_MODEL.find({ _id: { $in: sizes }, isDeleted: false }).select("_id name").session(session),
+            CATEGORIES_MODEL.find({ _id: { $in: categories }, isDeleted: false }).select("_id name").session(session),
         ]);
 
         let errors: Record<string, string> = {};
@@ -58,12 +59,22 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         if (hasSizes.length !== sizes?.length) errors.sizes = "Size ID does not exist";
         if (hasCategories.length !== categories?.length) errors.categories = "Category ID does not exist";
 
-        if (Object.keys(errors).length > 0) {
-            throw new CustomValidationError(409, errors);
-        };
+        // if (Object.keys(errors).length > 0) {
+        //     throw new CustomValidationError(409, errors);
+        // }
+
+        const userCreatedProduct = await GET_USER(req);
+        if (userCreatedProduct instanceof Error) throw new Error(userCreatedProduct.message);
 
         const newProduct = await PRODUCTS_MODEL.create(
-            [{ ...req.body }],
+            [{
+                ...req.body,
+                categories: hasCategories,
+                sizes: hasSizes,
+                colors: hasColors,
+                createdBy: userCreatedProduct.name,
+                status: status
+            }],
             { session }
         );
 
@@ -94,15 +105,19 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         const { name, colors, sizes, categories, status } = req.body as ProductTypo;
 
         const thisProduct = await PRODUCTS_MODEL.findById(id).session(session);
+
+        const userUpdatedProduct = await GET_USER(req);
+        if (userUpdatedProduct instanceof Error) throw new Error(userUpdatedProduct.message);
+
         if (!thisProduct) {
             throw new Error("Product not found");
         };
 
         const [anotherProduct, hasColors, hasSizes, hasCategories] = await Promise.all([
             PRODUCTS_MODEL.findOne({ _id: { $ne: id }, name: name }).session(session),
-            COLORS_MODEL.find({ _id: { $in: colors }, isDeleted: false }).select("_id").session(session),
-            SIZES_MODEL.find({ _id: { $in: sizes }, isDeleted: false }).select("_id").session(session),
-            CATEGORIES_MODEL.find({ _id: { $in: categories }, isDeleted: false }).select("_id").session(session),
+            COLORS_MODEL.find({ _id: { $in: colors }, isDeleted: false }).select("_id name").session(session),
+            SIZES_MODEL.find({ _id: { $in: sizes }, isDeleted: false }).select("_id name").session(session),
+            CATEGORIES_MODEL.find({ _id: { $in: categories }, isDeleted: false }).select("_id name").session(session),
         ]);
 
         let errors: Record<string, string> = {};
@@ -115,7 +130,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
             }
         };
 
-        if (status !== "0" && status !== "1") errors.status = "Status must be published or draft";
+        if (status !== "0" && status !== "1") errors.status = "Status must be 0 or 1";
 
         if (hasColors.length !== colors?.length) errors.colors = "Color ID does not exist";
         if (hasSizes.length !== sizes?.length) errors.sizes = "Size ID does not exist";
@@ -126,12 +141,14 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         };
 
         // updating 
-        thisProduct.name = name;
-        thisProduct.status = status;
-
-        thisProduct.colors = colors;
-        thisProduct.sizes = sizes;
-        thisProduct.categories = categories;
+        thisProduct.set({
+            name: name,
+            status: status,
+            colors: hasColors.map(c => ({ _id: c._id, name: c.name })),
+            sizes: hasSizes.map(s => ({ _id: s._id, name: s.name })),
+            categories: hasCategories.map(ct => ({ _id: ct._id, name: ct.name })),
+            updatedBy: userUpdatedProduct?.name
+        });
 
         await thisProduct.save();
         await session.commitTransaction();
@@ -151,7 +168,10 @@ export const softDeleteProduct = async (req: Request, res: Response, next: NextF
     try {
         const { id } = req.params;
 
-        const softDeleted = await softDeleteUtility(id as string, PRODUCTS_MODEL, "product");
+        const userDeletedProduct = await GET_USER(req);
+        if (userDeletedProduct instanceof Error) throw new Error(userDeletedProduct.message);
+
+        const softDeleted = await softDeleteUtility(id as string, PRODUCTS_MODEL, "product", userDeletedProduct);
         return res.status(200).json({
             message: `${softDeleted.name} soft deleted successfully`
         });

@@ -1,7 +1,10 @@
+import { UserTypo } from "../types";
+
 export const softDeleteUtility = async (
     id: string,
     Model: any,
-    modelName: string
+    modelName: string,
+    userWhoDelete: UserTypo
 ) => {
     const itemToDelete = await Model.findOne({ _id: id, isDeleted: false });
 
@@ -9,20 +12,12 @@ export const softDeleteUtility = async (
         throw new Error(`This ${modelName} is not found`);
     };
 
-    // if isDeleted is here , make it true
-    if ('isDeleted' in itemToDelete) {
-        (itemToDelete as any).isDeleted = true;
-    } else {
-        // set isDeleted if not set
-        (itemToDelete as any).$set("isDeleted", true);
-    }
-
-    if ('deletedAt' in itemToDelete) {
-        (itemToDelete as any).deletedAt = new Date();
-    } else {
-        (itemToDelete as any).$set("deletedAt", new Date());
-    }
+    itemToDelete.set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: userWhoDelete?.name
+    });
 
     await itemToDelete.save();
     return itemToDelete.toObject();
-}
+};

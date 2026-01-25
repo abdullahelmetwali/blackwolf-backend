@@ -20,7 +20,6 @@ COLORS_ROUTE.get("/", async (_, res) => {
         return res.status(200).json({ data: colors });
     } catch (error: Error | any) {
         res.status(500).json({
-            success: false,
             error: error.message,
         });
     }
@@ -37,7 +36,6 @@ COLORS_ROUTE.get("/deleted", AUTH_MIDDLEWARE, async (_, res) => {
         })
     } catch (error: Error | any) {
         res.status(500).json({
-            success: false,
             error: error.message,
         });
     }

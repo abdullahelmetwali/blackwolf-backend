@@ -14,7 +14,6 @@ USERS_ROUTE.get("/", async (_, res) => {
         return res.status(200).json({ data: users });
     } catch (error: Error | any) {
         res.status(500).json({
-            success: false,
             error: error.message,
         });
     }

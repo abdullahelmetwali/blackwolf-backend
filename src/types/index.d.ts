@@ -3,12 +3,19 @@ export interface ValidationErrors {
 };
 
 export interface UserTypo {
+    _id: string
     slug: string;
     name: string;
+    phone: string,
     email: string;
     password: string;
     gender: "male" | "female";
     role: "admin" | "customer"
+};
+
+export type IdAndName = {
+    _id: string,
+    name: string
 };
 
 export interface ProductTypo {
@@ -16,9 +23,9 @@ export interface ProductTypo {
     name: string;
     description: string,
     image: string,
-    colors: string[];
-    categories: string[];
-    sizes: string[];
+    colors: IdAndName[];
+    categories: IdAndName[];
+    sizes: IdAndName[];
     price: number;
     oldPrice?: number,
     discount?: number,

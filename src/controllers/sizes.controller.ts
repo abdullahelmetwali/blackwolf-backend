@@ -6,6 +6,7 @@ import { SIZES_MODEL } from "../models/sizes.model";
 import { softDeleteUtility } from "../utils/soft-delete";
 import { hardDeleteUtility } from "../utils/hard-delete";
 import { restoreUtility } from "../utils/restore";
+import { GET_USER } from "../utils/get-user";
 
 export const createSize = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -67,7 +68,11 @@ export const updateSize = async (req: Request, res: Response, next: NextFunction
 export const softDeleteSize = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const softDeleted = await softDeleteUtility(id as string, SIZES_MODEL as any, "size");
+
+        const userDeletedProduct = await GET_USER(req);
+        if (userDeletedProduct instanceof Error) throw new Error(userDeletedProduct.message);
+
+        const softDeleted = await softDeleteUtility(id as string, SIZES_MODEL as any, "size", userDeletedProduct);
 
         return res.status(200).json({
             message: `${softDeleted.name} soft deleted successfully`

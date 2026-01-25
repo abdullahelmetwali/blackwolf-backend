@@ -13,7 +13,7 @@ const UserSchema = new Schema({
         type: String,
         trim: true,
         required: [true, "Name is required"],
-        minlength: [12, "Name length must be more than 12 letters"],
+        minlength: [8, "Name length must be more than 8 letters"],
         maxlength: [200, "Name length must be less than 200 letters"],
     },
     email: {
@@ -27,9 +27,11 @@ const UserSchema = new Schema({
     phone: {
         type: String,
         required: [true, "Phone number is required"],
-        trim: true,
-        minLength: 8,
-        maxLength: 11,
+        validate: {
+            // validate phone number
+            validator: (v: string) => /^[0-9]{10,15}$/.test(v),
+            message: "Invalid phone number format"
+        }
     },
     password: {
         type: String,

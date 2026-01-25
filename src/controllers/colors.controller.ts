@@ -6,6 +6,7 @@ import { COLORS_MODEL } from "../models/colors.model";
 import { softDeleteUtility } from "../utils/soft-delete";
 import { hardDeleteUtility } from "../utils/hard-delete";
 import { restoreUtility } from "../utils/restore";
+import { GET_USER } from "../utils/get-user";
 
 export const createColor = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -59,11 +60,12 @@ export const updateColor = async (req: Request, res: Response, next: NextFunctio
             }
         };
 
-        thisColor.name = name;
-        thisColor.value = value;
-        if (status !== undefined) thisColor.status = status;
+        thisColor.set({
+            name: name,
+            value: value,
+            status: status || thisColor.status
+        });
 
-        // save this Color new data after checking all data 
         await thisColor.save();
         return res.status(200).json(thisColor.toObject());
     } catch (error) {
@@ -74,7 +76,11 @@ export const updateColor = async (req: Request, res: Response, next: NextFunctio
 export const softDeleteColor = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const softDeleted = await softDeleteUtility(id as string, COLORS_MODEL as any, "color");
+
+        const userDeletedProduct = await GET_USER(req);
+        if (userDeletedProduct instanceof Error) throw new Error(userDeletedProduct.message);
+
+        const softDeleted = await softDeleteUtility(id as string, COLORS_MODEL as any, "color", userDeletedProduct);
 
         return res.status(200).json({
             message: `${softDeleted.name} soft deleted successfully`
