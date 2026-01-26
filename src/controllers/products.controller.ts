@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { startSession } from "mongoose";
 
-import { ProductTypo } from "../types";
+import { Product } from "../types";
 import { CustomValidationError } from "../classes";
 
 import { PRODUCTS_MODEL } from "../models/products.model";
@@ -35,7 +35,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
     const session = await startSession();
     session.startTransaction();
     try {
-        const { name, colors, sizes, categories, status } = req.body as ProductTypo;
+        const { name, colors, sizes, categories, status } = req.body as Product;
 
         const [anotherProduct, hasColors, hasSizes, hasCategories] = await Promise.all([
             PRODUCTS_MODEL.findOne({ name: name }).session(session),
@@ -102,7 +102,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     session.startTransaction();
     try {
         const { id } = req.params;
-        const { name, colors, sizes, categories, status } = req.body as ProductTypo;
+        const { name, colors, sizes, categories, status } = req.body as Product;
 
         const thisProduct = await PRODUCTS_MODEL.findById(id).session(session);
 

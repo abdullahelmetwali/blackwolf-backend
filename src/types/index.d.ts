@@ -13,21 +13,48 @@ export interface UserTypo {
     role: "admin" | "customer"
 };
 
-export type IdAndName = {
-    _id: string,
-    name: string
+export interface Review {
+    user: string;
+    rating: number;
+    comment: string;
+    createdAt: Date;
 };
 
-export interface ProductTypo {
+export interface Category {
+    _id: string;
+    name: string;
+    slug: string
+};
+
+export interface Size {
+    _id: string;
+    name: string;
+};
+
+export interface Color {
+    _id: string;
+    name: string;
+    value: string
+};
+
+export interface Product {
+    _id: string
     slug: string;
     name: string;
-    description: string,
-    image: string,
-    colors: IdAndName[];
-    categories: IdAndName[];
-    sizes: IdAndName[];
+    description: string;
     price: number;
-    oldPrice?: number,
-    discount?: number,
-    status: "0" | "1"
+    oldPrice: number;
+    discount: number;
+    inStock: number;
+    reviews: Review[];
+    image?: string;
+    categories: Category[];
+    sizes: Size[];
+    colors: Color[];
+    status: '0' | '1';
+    isDeleted: boolean;
+    deletedAt: Date | null;
+    deletedBy: string | null;
+    createdBy: string | null;
+    updatedBy: string | null;
 };

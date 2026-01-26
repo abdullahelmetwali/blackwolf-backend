@@ -26,7 +26,7 @@ app.use(cookieParser());
 // CORS
 app.use(
     cors({
-        origin: ["http://localhost:3000", "https://express-learn-wine.vercel.app/"],
+        origin: ["http://localhost:3000", "https://blackwolf-backend.vercel.app"],
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
         allowedHeaders: ["Content-Type", "Authorization"],
     })
