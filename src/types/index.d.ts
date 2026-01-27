@@ -47,7 +47,12 @@ export interface Product {
     discount: number;
     inStock: number;
     reviews: Review[];
-    image?: string;
+    image: string;
+    // image: [{
+    //     fieldName: string,
+    //     originalName: string,
+    //     mimetype: string
+    // }];
     categories: Category[];
     sizes: Size[];
     colors: Color[];

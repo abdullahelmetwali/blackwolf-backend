@@ -63,7 +63,9 @@ const ProductSchema = new Schema({
         default: []
     },
     image: {
-        type: String
+        type: String,
+        default: null,
+        required: [true, "Product image is required"]
     },
     categories: {
         type: [{ _id: { type: String }, name: { type: String } }],
@@ -123,17 +125,20 @@ const ProductSchema = new Schema({
     versionKey: false,
 });
 
+// discount and price
 ProductSchema.pre("save", async function () {
     if (!this.isNew && !this.isModified("discount") && !this.isModified("price")) {
         return;
     };
-
     if (this.discount && this.discount > 0) {
         const discountAmount = (this.price * Number(this.discount)) / 100;
         this.oldPrice = this.price;
         this.price = this.price - discountAmount;
     };
+});
 
+// slug
+ProductSchema.pre("save", async function () {
     if (!this.isNew && !this.isModified("name")) return;
     this.slug = await makeSlug(this.name, this.constructor);
 });

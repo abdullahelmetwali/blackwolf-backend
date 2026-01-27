@@ -1,7 +1,7 @@
 import { Router, Response, Request } from "express";
 import { USERS_MODEL } from "../models/users.model";
 import { AUTH_MIDDLEWARE } from "../middlewares/auth.middleware";
-import { GET_USER } from "@/utils/get-user";
+import { GET_USER } from "../utils/get-user";
 
 const USERS_ROUTE = Router();
 

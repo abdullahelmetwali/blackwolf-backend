@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import { uploadSingle } from "../middlewares/upload.middleware";
 import { AUTH_MIDDLEWARE } from "../middlewares/auth.middleware";
 import { PRODUCTS_MODEL } from "../models/products.model";
 import {
@@ -31,10 +32,10 @@ PRODUCTS_ROUTE.get("/deleted", AUTH_MIDDLEWARE, async (_, res) => {
 });
 
 // create product 
-PRODUCTS_ROUTE.post("/", AUTH_MIDDLEWARE, createProduct);
+PRODUCTS_ROUTE.post("/", AUTH_MIDDLEWARE, uploadSingle("image"), createProduct);
 
 // update product
-PRODUCTS_ROUTE.put("/:id", AUTH_MIDDLEWARE, updateProduct);
+PRODUCTS_ROUTE.put("/:id", AUTH_MIDDLEWARE, uploadSingle("image"), updateProduct);
 
 // soft delete
 PRODUCTS_ROUTE.delete("/:id", AUTH_MIDDLEWARE, softDeleteProduct);
