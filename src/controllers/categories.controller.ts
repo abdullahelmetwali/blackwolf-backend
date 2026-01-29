@@ -13,6 +13,9 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 
         const sameCategory = await CATEGORIES_MODEL.findOne({ name })
 
+        const userCreatedCategory = await GET_USER(req);
+        if (userCreatedCategory instanceof Error) throw new Error(userCreatedCategory.message);
+
         let errors: Record<string, string> = {};
 
         if (sameCategory?.isDeleted) errors.name = "This name exsits in a deleted category";
@@ -22,8 +25,14 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
             throw new CustomValidationError(409, errors);
         };
 
-        const newCategory = await CATEGORIES_MODEL.create(req.body);
-        return res.status(201).json(newCategory);
+        const newCategory = await CATEGORIES_MODEL.create({
+            ...req.body,
+            createdBy: userCreatedCategory.name
+        });
+
+        return res.status(201).json({
+            data: newCategory
+        });
     } catch (error) {
         return next(error);
     }
@@ -39,6 +48,9 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
             throw new Error("Category not found!");
         };
 
+        const userUpdatedCategory = await GET_USER(req);
+        if (userUpdatedCategory instanceof Error) throw new Error(userUpdatedCategory.message);
+
         // see if there is name
         if (name && name !== thisCategory.name) {
 
@@ -51,11 +63,16 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
             if (sameCategory?.isDeleted) throw new CustomValidationError(409, { name: "This name exists in a deleted category" });
         };
 
-        thisCategory.name = name;
+        thisCategory.set({
+            name: name,
+            updatedBy: userUpdatedCategory.name
+        })
 
         // save this Category new data after checking all data 
         await thisCategory.save();
-        return res.status(200).json(thisCategory.toObject());
+        return res.status(200).json({
+            data: thisCategory.toObject()
+        });
     } catch (error) {
         next(error);
     };

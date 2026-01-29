@@ -80,7 +80,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
             throw new Error("Failed to get category");
         };
 
-        // if (!req.file) errors.image = "Please upload product's image";
+        if (!req.file) errors.image = "Please upload product's image";
 
         if (Object.keys(errors).length > 0) {
             throw new CustomValidationError(409, errors);
@@ -129,7 +129,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     try {
         session.startTransaction();
         const { id } = req.params;
-        const { name, colors, sizes, categories, status } = req.body as Product;
+        const { name, description, colors, sizes, categories, status, price, discount, inStock, image } = req.body as Product;
 
         const thisProduct = await PRODUCTS_MODEL.findById(id).session(session);
 
@@ -141,7 +141,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         };
 
         const [anotherProduct, hasColors, hasSizes, hasCategories] = await Promise.allSettled([
-            PRODUCTS_MODEL.findOne({ name: name }).session(session),
+            PRODUCTS_MODEL.findOne({ _id: { $ne: id }, name: name }).session(session),
             COLORS_MODEL.find({ _id: { $in: colors }, isDeleted: false }).select("_id name").session(session),
             SIZES_MODEL.find({ _id: { $in: sizes }, isDeleted: false }).select("_id name").session(session),
             CATEGORIES_MODEL.find({ _id: { $in: categories }, isDeleted: false }).select("_id name").session(session),
@@ -190,6 +190,11 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         // updating 
         thisProduct.set({
             name: name,
+            description: description,
+            price: price,
+            discount: discount,
+            inStock: inStock,
+            image: image,
             status: status,
             colors: hasColors.value.map(c => ({ _id: c._id, name: c.name })),
             sizes: hasSizes.value.map(s => ({ _id: s._id, name: s.name })),

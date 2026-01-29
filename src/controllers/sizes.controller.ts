@@ -13,6 +13,9 @@ export const createSize = async (req: Request, res: Response, next: NextFunction
         const { name } = req.body;
         const isExsits = await SIZES_MODEL.findOne({ name });
 
+        const userCreatedSize = await GET_USER(req);
+        if (userCreatedSize instanceof Error) throw new Error(userCreatedSize.message);
+
         if (isExsits) {
             if (isExsits.isDeleted) throw new Error("This size is deleted , check it")
             throw new CustomValidationError(409, {
@@ -20,8 +23,13 @@ export const createSize = async (req: Request, res: Response, next: NextFunction
             });
         };
 
-        const newSize = await SIZES_MODEL.create(req.body);
-        return res.status(201).json(newSize);
+        const newSize = await SIZES_MODEL.create({
+            ...req.body,
+            createdBy: userCreatedSize.name,
+        });
+        return res.status(201).json({
+            data: newSize
+        });
     } catch (error) {
         next(error);
     };
@@ -34,6 +42,9 @@ export const updateSize = async (req: Request, res: Response, next: NextFunction
 
         // get the size for the session ( user ) is getting it 
         const thisSize = await SIZES_MODEL.findById(id);
+
+        const userUpdatedSize = await GET_USER(req);
+        if (userUpdatedSize instanceof Error) throw new Error(userUpdatedSize.message);
 
         if (!thisSize) {
             throw new Error("Size not found!");
@@ -54,8 +65,11 @@ export const updateSize = async (req: Request, res: Response, next: NextFunction
             };
         };
 
-        thisSize.name = name;
-        if (status !== undefined) thisSize.status = status;
+        thisSize.set({
+            name: name,
+            status: status,
+            updatedBy: userUpdatedSize.name
+        });
 
         // save this size new data after checking all data 
         await thisSize.save();
@@ -69,10 +83,10 @@ export const softDeleteSize = async (req: Request, res: Response, next: NextFunc
     try {
         const { id } = req.params;
 
-        const userDeletedProduct = await GET_USER(req);
-        if (userDeletedProduct instanceof Error) throw new Error(userDeletedProduct.message);
+        const userDeletedSize = await GET_USER(req);
+        if (userDeletedSize instanceof Error) throw new Error(userDeletedSize.message);
 
-        const softDeleted = await softDeleteUtility(id as string, SIZES_MODEL as any, "size", userDeletedProduct);
+        const softDeleted = await softDeleteUtility(id as string, SIZES_MODEL as any, "size", userDeletedSize);
 
         return res.status(200).json({
             message: `${softDeleted.name} soft deleted successfully`

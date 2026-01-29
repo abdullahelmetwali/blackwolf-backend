@@ -15,7 +15,7 @@ const COLORS_ROUTE = Router();
 // all color 
 COLORS_ROUTE.get("/", async (_, res) => {
     try {
-        // const colors = await COLORS_MODEL.db.dropDatabase();
+        // const colors = await COLORS_MODEL.deleteMany({}).lean();
         const colors = await COLORS_MODEL.find({ isDeleted: false }).lean();
         return res.status(200).json({ data: colors });
     } catch (error: Error | any) {

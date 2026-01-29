@@ -28,13 +28,24 @@ const ColorSchema = new Schema({
     },
     isDeleted: {
         type: Boolean,
-        default: false,
-        index: true
+        default: false
     },
     deletedAt: {
         type: Date,
         default: null
-    }
+    },
+    deletedBy: {
+        type: String,
+        default: null
+    },
+    createdBy: {
+        type: String,
+        default: null
+    },
+    updatedBy: {
+        type: String,
+        default: null
+    },
 }, {
     timestamps: true,
     versionKey: false

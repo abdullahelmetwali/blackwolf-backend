@@ -14,6 +14,12 @@ const CategorySchema = new Schema({
         trim: true,
         unique: true,
     },
+    status: {
+        type: String,
+        enum: ["0", "1"],
+        default: "1",
+        required: false
+    },
     isDeleted: {
         type: Boolean,
         default: false
@@ -22,11 +28,17 @@ const CategorySchema = new Schema({
         type: Date,
         default: null
     },
-    status: {
+    deletedBy: {
         type: String,
-        enum: ["0", "1"],
-        default: "1",
-        required: false
+        default: null
+    },
+    createdBy: {
+        type: String,
+        default: null
+    },
+    updatedBy: {
+        type: String,
+        default: null
     },
 }, {
     timestamps: true,

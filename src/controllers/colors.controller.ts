@@ -13,6 +13,9 @@ export const createColor = async (req: Request, res: Response, next: NextFunctio
         const { name, value } = req.body;
         const isExsits = await COLORS_MODEL.findOne({ name, value });
 
+        const userCreatedColor = await GET_USER(req);
+        if (userCreatedColor instanceof Error) throw new Error(userCreatedColor.message);
+
         if (isExsits) {
             if (isExsits.isDeleted) throw new Error("This color is deleted , check it");
 
@@ -23,10 +26,15 @@ export const createColor = async (req: Request, res: Response, next: NextFunctio
             };
 
             throw new CustomValidationError(409, errors);
-        }
+        };
 
-        const newColor = await COLORS_MODEL.create(req.body);
-        return res.status(201).json(newColor);
+        const newColor = await COLORS_MODEL.create({
+            ...req.body,
+            createdBy: userCreatedColor.name
+        });
+        return res.status(201).json({
+            data: newColor
+        });
     } catch (error) {
         next(error);
     };
@@ -41,6 +49,9 @@ export const updateColor = async (req: Request, res: Response, next: NextFunctio
         if (!thisColor) {
             throw new Error("Color not found!");
         };
+
+        const userUpdatedColor = await GET_USER(req);
+        if (userUpdatedColor instanceof Error) throw new Error(userUpdatedColor.message);
 
         // see if there is name or value applied in another color
         if ((name && name !== thisColor.name) || (value && value !== thisColor.value)) {
@@ -63,11 +74,14 @@ export const updateColor = async (req: Request, res: Response, next: NextFunctio
         thisColor.set({
             name: name,
             value: value,
-            status: status || thisColor.status
+            status: status || thisColor.status,
+            updatedBy: userUpdatedColor.name
         });
 
         await thisColor.save();
-        return res.status(200).json(thisColor.toObject());
+        return res.status(200).json({
+            data: thisColor.toObject()
+        });
     } catch (error) {
         next(error);
     };
@@ -77,10 +91,10 @@ export const softDeleteColor = async (req: Request, res: Response, next: NextFun
     try {
         const { id } = req.params;
 
-        const userDeletedProduct = await GET_USER(req);
-        if (userDeletedProduct instanceof Error) throw new Error(userDeletedProduct.message);
+        const userDeletedColor = await GET_USER(req);
+        if (userDeletedColor instanceof Error) throw new Error(userDeletedColor.message);
 
-        const softDeleted = await softDeleteUtility(id as string, COLORS_MODEL as any, "color", userDeletedProduct);
+        const softDeleted = await softDeleteUtility(id as string, COLORS_MODEL as any, "color", userDeletedColor);
 
         return res.status(200).json({
             message: `${softDeleted.name} soft deleted successfully`
@@ -93,6 +107,7 @@ export const softDeleteColor = async (req: Request, res: Response, next: NextFun
 export const hardDeleteColor = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
+
         const hardDeleted = await hardDeleteUtility(id as string, COLORS_MODEL, "color");
 
         return res.status(200).json({

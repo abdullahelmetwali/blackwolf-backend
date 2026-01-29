@@ -15,6 +15,7 @@ const CATEGORIES_ROUTE = Router();
 // all categories 
 CATEGORIES_ROUTE.get("/", async (_, res) => {
     try {
+        // const categories = await CATEGORIES_MODEL.deleteMany({}).lean();
         const categories = await CATEGORIES_MODEL.find({ isDeleted: false }).lean();
         return res.status(200).json({ data: categories });
     } catch (error: Error | any) {

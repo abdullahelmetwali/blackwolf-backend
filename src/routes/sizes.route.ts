@@ -15,9 +15,8 @@ const SIZES_ROUTE = Router();
 // all sizes
 SIZES_ROUTE.get("/", async (_, res) => {
     try {
-        const sizes = await SIZES_MODEL.find({
-            isDeleted: false
-        }).lean();
+        // const sizes = await SIZES_MODEL.deleteMany({}).lean();
+        const sizes = await SIZES_MODEL.find({ isDeleted: false }).lean();
 
         return res.status(200).json({ data: sizes });
     } catch (error: Error | any) {
