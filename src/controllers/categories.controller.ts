@@ -2,10 +2,11 @@ import { Request, Response, NextFunction } from "express";
 
 import { CustomValidationError } from "../classes";
 import { CATEGORIES_MODEL } from "../models/categories.model";
+import { GET_USER } from "../utils/get-user";
+
 import { softDeleteUtility } from "../utils/soft-delete";
 import { hardDeleteUtility } from "../utils/hard-delete";
 import { restoreUtility } from "../utils/restore";
-import { GET_USER } from "../utils/get-user";
 
 export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {

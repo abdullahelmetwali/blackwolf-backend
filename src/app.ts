@@ -9,7 +9,7 @@ import { ERROR_MIDDLEWARE } from "./middlewares/error.middleware";
 
 import AUTH_ROUTE from "./routes/auth.route";
 import USERS_ROUTE from "./routes/users.route";
-import PERMISSIONS_ROUTE from "./routes/permissions.route";
+import CART_ROUTE from "./routes/cart.route";
 
 import PRODUCTS_ROUTE from "./routes/products.route";
 import INVENTORY_ROUTE from "./routes/inventory.route";
@@ -39,7 +39,7 @@ app.get("/api/v1/", (req, res) => {
 // routes
 app.use("/api/v1/auth", AUTH_ROUTE);
 app.use("/api/v1/users", USERS_ROUTE);
-app.use("/api/v1/permissions", PERMISSIONS_ROUTE);
+app.use("/api/v1/cart", CART_ROUTE);
 
 app.use("/api/v1/products", PRODUCTS_ROUTE);
 app.use("/api/v1/inventory", INVENTORY_ROUTE);

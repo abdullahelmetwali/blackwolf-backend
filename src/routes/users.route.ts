@@ -1,5 +1,6 @@
 import { Router, Response, Request } from "express";
 import { USERS_MODEL } from "../models/users.model";
+
 import { AUTH_MIDDLEWARE } from "../middlewares/auth.middleware";
 import { GET_USER } from "../utils/get-user";
 
@@ -25,7 +26,10 @@ USERS_ROUTE.get("/", async (_, res) => {
 USERS_ROUTE.get("/dashboard", async (req: Request, res: Response) => {
     try {
         const user = await GET_USER(req);
+
         if (user instanceof Error) throw new Error(user?.message);
+        if (user?.role !== "admin") throw new Error("You are not authorized to access this route");
+
         return res.status(200).json({ data: user });
     } catch (error: Error | any) {
         res.status(500).json({
