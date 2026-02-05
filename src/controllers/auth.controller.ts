@@ -6,7 +6,9 @@ import jwt from "jsonwebtoken";
 import { UserTypo } from "../types";
 import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/env";
 import { CustomValidationError } from "../classes";
+
 import { USERS_MODEL } from "../models/users.model";
+import { GET_USER } from "../utils/get-user";
 
 export const logIn = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -51,7 +53,7 @@ export const logIn = async (req: Request, res: Response, next: NextFunction) => 
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { email, name, password, phone, role, gender } = req.body as UserTypo;
+        const { email, name, password, phone, role, gender, } = req.body as UserTypo;
 
         // check if user exists , to avoid making the whole logic
         const isExisting = await USERS_MODEL.findOne({ email, phone });
@@ -72,14 +74,21 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        const createdUser = await GET_USER(req) || null;
+
         const newUser = await USERS_MODEL.create({
             name: name,
             email: email,
             phone: String(phone),
             role: role,
-            password: hashedPassword
+            password: hashedPassword,
+            ...(createdUser instanceof Error || !createdUser ? {} : {
+                createdBy: {
+                    name: createdUser.name,
+                    email: createdUser.email
+                }
+            })
         });
-
         if (!newUser || !JWT_SECRET || !JWT_EXPIRES_IN) {
             throw new Error("User creation failed");
         };
@@ -104,8 +113,4 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     } catch (error) {
         next(error);
     }
-};
-
-export const logOut = async (req: Request, res: Response) => {
-
 };

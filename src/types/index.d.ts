@@ -10,7 +10,8 @@ export interface UserTypo {
     email: string;
     password: string;
     gender: "male" | "female";
-    role: "admin" | "customer"
+    role: "admin" | "customer",
+    cart: CartItem[]
 };
 
 export interface Review {
@@ -48,11 +49,6 @@ export interface Product {
     inStock: number;
     reviews: Review[];
     image: string;
-    // image: [{
-    //     fieldName: string,
-    //     originalName: string,
-    //     mimetype: string
-    // }];
     categories: Category[];
     sizes: Size[];
     colors: Color[];
@@ -63,3 +59,16 @@ export interface Product {
     createdBy: string | null;
     updatedBy: string | null;
 };
+
+export interface CartItem {
+    product: {
+        name: string,
+        image: string,
+        price: number;
+        oldPrice?: number;
+        discount?: number;
+    },
+    color: Color,
+    size: Size,
+    quantity: number;
+}

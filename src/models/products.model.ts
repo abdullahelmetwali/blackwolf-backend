@@ -54,7 +54,7 @@ const ProductSchema = new Schema({
     reviews: {
         type: [
             {
-                user: { type: String, required: true },
+                user: { type: Schema.Types.ObjectId, ref: "Users", required: true },
                 rating: { type: Number, min: 1, max: 5, required: true },
                 comment: { type: String, default: "" },
                 createdAt: { type: Date, default: Date.now() }

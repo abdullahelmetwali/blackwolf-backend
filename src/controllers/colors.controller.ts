@@ -30,7 +30,10 @@ export const createColor = async (req: Request, res: Response, next: NextFunctio
 
         const newColor = await COLORS_MODEL.create({
             ...req.body,
-            createdBy: userCreatedColor.name
+            createdBy: {
+                name: userCreatedColor.name,
+                email: userCreatedColor.email
+            }
         });
         return res.status(201).json({
             data: newColor

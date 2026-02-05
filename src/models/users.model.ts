@@ -45,7 +45,12 @@ const UserSchema = new Schema({
         required: false
     },
     cart: {
-        type: [],
+        type: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Cart",
+            }
+        ],
         default: []
     },
     role: {
@@ -53,6 +58,14 @@ const UserSchema = new Schema({
         required: [true, "User role is required"],
         enum: ["admin", "customer"],
         default: "customer"
+    },
+    createdBy: {
+        name: {
+            type: String
+        },
+        email: {
+            type: String
+        },
     }
 }, {
     timestamps: true,

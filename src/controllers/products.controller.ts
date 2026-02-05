@@ -97,7 +97,10 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
                 categories: hasCategories.value,
                 sizes: hasSizes.value,
                 colors: hasColors.value,
-                createdBy: userCreatedProduct.name,
+                createdBy: {
+                    name: userCreatedProduct.name,
+                    email: userCreatedProduct.email
+                },
                 image: imgURL
             }],
             { session }

@@ -29,16 +29,28 @@ const CategorySchema = new Schema({
         default: null
     },
     deletedBy: {
-        type: String,
-        default: null
+        name: {
+            type: String,
+        },
+        email: {
+            type: String,
+        }
     },
     createdBy: {
-        type: String,
-        default: null
+        name: {
+            type: String,
+        },
+        email: {
+            type: String,
+        }
     },
     updatedBy: {
-        type: String,
-        default: null
+        name: {
+            type: String,
+        },
+        email: {
+            type: String,
+        }
     },
 }, {
     timestamps: true,

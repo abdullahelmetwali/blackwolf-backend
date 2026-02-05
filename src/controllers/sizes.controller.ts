@@ -25,7 +25,10 @@ export const createSize = async (req: Request, res: Response, next: NextFunction
 
         const newSize = await SIZES_MODEL.create({
             ...req.body,
-            createdBy: userCreatedSize.name,
+            createdBy: {
+                name: userCreatedSize.name,
+                email: userCreatedSize.email
+            }
         });
         return res.status(201).json({
             data: newSize

@@ -28,7 +28,10 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
 
         const newCategory = await CATEGORIES_MODEL.create({
             ...req.body,
-            createdBy: userCreatedCategory.name
+            createdBy: {
+                name: userCreatedCategory.name,
+                email: userCreatedCategory.email
+            }
         });
 
         return res.status(201).json({

@@ -1,10 +1,14 @@
 import jwt from "jsonwebtoken";
 import { Request } from "express";
+import { Document } from "mongoose";
+
 import { UserTypo } from "../types";
 import { JWT_SECRET } from "../config/env";
 import { USERS_MODEL } from "../models/users.model";
 
-export const GET_USER: (req: Request) => Promise<UserTypo | Error> = async (req) => {
+export type UserDocument = Document & UserTypo;
+
+export const GET_USER: (req: Request) => Promise<UserDocument | Error> = async (req) => {
     const AUTHORIZATION = req.header("Authorization");
 
     if (!AUTHORIZATION) {
@@ -25,12 +29,13 @@ export const GET_USER: (req: Request) => Promise<UserTypo | Error> = async (req)
         }
 
         const userID = decoded.userId;
-        const user = await USERS_MODEL.findById(userID) as UserTypo;
+        const user = await USERS_MODEL.findById(userID) as UserDocument;
 
         if (!user) {
-            return new Error("User not found");
+            return new Error("User not found!");
         }
 
+        delete (user as any).password;
         return user;
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {

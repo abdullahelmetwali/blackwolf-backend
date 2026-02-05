@@ -32,12 +32,20 @@ const SizeSchema = new Schema({
         default: null
     },
     createdBy: {
-        type: String,
-        default: null
+        name: {
+            type: String,
+        },
+        email: {
+            type: String,
+        }
     },
     updatedBy: {
-        type: String,
-        default: null
+        name: {
+            type: String,
+        },
+        email: {
+            type: String,
+        }
     },
 }, {
     timestamps: true,

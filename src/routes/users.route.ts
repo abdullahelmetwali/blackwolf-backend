@@ -3,6 +3,8 @@ import { USERS_MODEL } from "../models/users.model";
 
 import { AUTH_MIDDLEWARE } from "../middlewares/auth.middleware";
 import { GET_USER } from "../utils/get-user";
+import { register } from "../controllers/auth.controller";
+import { hardDeleteUser, restoreUser, softDeleteUser } from "../controllers/users.controller";
 
 const USERS_ROUTE = Router();
 
@@ -12,6 +14,7 @@ const USERS_ROUTE = Router();
 USERS_ROUTE.get("/", async (_, res) => {
     try {
         // .lean() -> plain JS objects
+        // const users = await USERS_MODEL.deleteMany({}).lean()
         const users = await USERS_MODEL.find({}, { password: 0 }).lean();
 
         return res.status(200).json({ data: users });
@@ -51,12 +54,14 @@ USERS_ROUTE.get("/profile", async (req: Request, res: Response) => {
     }
 });
 
-USERS_ROUTE.get("/:slug", (req, res) => res.send({ message: `Get user details for` }));
+USERS_ROUTE.get("/:id", (req, res) => res.send({ message: `Get user details for` }));
 
-USERS_ROUTE.post("/", (req, res) => res.send({ message: "Create a user" }));
+USERS_ROUTE.post("/", AUTH_MIDDLEWARE, register);
 
-USERS_ROUTE.put("/:id", (req, res) => res.send({ message: "Update user by id" }));
+USERS_ROUTE.delete("/soft/:id", AUTH_MIDDLEWARE, softDeleteUser);
 
-USERS_ROUTE.delete("/:id", (req, res) => res.send({ message: "Delete user by id" }));
+USERS_ROUTE.delete("/hard/:id", AUTH_MIDDLEWARE, hardDeleteUser);
+
+USERS_ROUTE.delete("/restore/:id", AUTH_MIDDLEWARE, restoreUser);
 
 export default USERS_ROUTE;

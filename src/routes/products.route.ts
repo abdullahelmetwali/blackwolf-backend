@@ -38,7 +38,7 @@ PRODUCTS_ROUTE.post("/", AUTH_MIDDLEWARE, uploadSingle("image"), createProduct);
 PRODUCTS_ROUTE.put("/:id", AUTH_MIDDLEWARE, uploadSingle("image"), updateProduct);
 
 // soft delete
-PRODUCTS_ROUTE.delete("/:id", AUTH_MIDDLEWARE, softDeleteProduct);
+PRODUCTS_ROUTE.delete("/soft/:id", AUTH_MIDDLEWARE, softDeleteProduct);
 
 // hard delete
 PRODUCTS_ROUTE.delete("/hard/:id", AUTH_MIDDLEWARE, hardDeleteProduct);
