@@ -9,7 +9,21 @@ const UserSchema = new Schema({
         index: true,
         trim: true,
     },
-    name: {
+    firstName: {
+        type: String,
+        trim: true,
+        required: [true, "First name is required"],
+        minlength: [3, "First name length must be more than 3 letters"],
+        maxlength: [100, "First name length must be less than 100 letters"],
+    },
+    lastName: {
+        type: String,
+        trim: true,
+        required: [true, "Last name is required"],
+        minlength: [3, "Last name length must be more than 3 letters"],
+        maxlength: [100, "Last name length must be less than 100 letters"],
+    },
+    fullName: {
         type: String,
         trim: true,
         required: [true, "Name is required"],
@@ -38,6 +52,7 @@ const UserSchema = new Schema({
         trim: true,
         required: [true, "Password is required"],
         minlength: [12, "Password length must be more than 12 letters"],
+        select: false
     },
     gender: {
         type: String,
@@ -47,8 +62,29 @@ const UserSchema = new Schema({
     cart: {
         type: [
             {
-                type: Schema.Types.ObjectId,
-                ref: "Cart",
+                product: {
+                    _id: { type: Schema.Types.ObjectId, required: true },
+                    name: String,
+                    slug: String,
+                    image: String,
+                    price: Number,
+                    oldPrice: Number,
+                    discount: Number,
+                },
+                size: {
+                    type: String,
+                    required: [true, "Size is required"]
+                },
+                color: {
+                    type: String,
+                    required: [true, "Color is required"]
+                },
+                quantity: {
+                    type: Number,
+                    max: 15,
+                    min: 1,
+                    required: [true, "Quantity is required"]
+                },
             }
         ],
         default: []
@@ -73,8 +109,9 @@ const UserSchema = new Schema({
 });
 
 UserSchema.pre("save", async function () {
-    if (!this.isNew && !this.isModified("name")) return;
-    this.slug = await makeSlug(this.name, this.constructor);
+    if (!this.isNew && !this.isModified("firstName") && !this.isModified("lastName")) return;
+    this.fullName = `${this.firstName} ${this.lastName}`;
+    this.slug = await makeSlug(this.fullName, this.constructor);
 });
 
 export const USERS_MODEL = model("Users", UserSchema);

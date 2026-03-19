@@ -21,7 +21,7 @@ export async function AUTH_MIDDLEWARE(
                 message: "Forbidden: You do not have permission to access this resource"
             });
         }
-
+        console.log(userRole);
         next();
 
     } catch (error: Error | any) {

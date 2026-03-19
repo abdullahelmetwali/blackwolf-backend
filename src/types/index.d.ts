@@ -1,11 +1,15 @@
+import { Types } from "mongoose";
+
 export interface ValidationErrors {
     [key: string]: string;
 };
 
 export interface UserTypo {
-    _id: string
+    _id: Types.ObjectId
     slug: string;
-    name: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
     phone: string,
     email: string;
     password: string;
@@ -22,24 +26,24 @@ export interface Review {
 };
 
 export interface Category {
-    _id: string;
+    _id: Types.ObjectId;
     name: string;
     slug: string
 };
 
 export interface Size {
-    _id: string;
+    _id: Types.ObjectId;
     name: string;
 };
 
 export interface Color {
-    _id: string;
+    _id: Types.ObjectId;
     name: string;
     value: string
 };
 
 export interface Product {
-    _id: string
+    _id: Types.ObjectId
     slug: string;
     name: string;
     description: string;
@@ -61,14 +65,17 @@ export interface Product {
 };
 
 export interface CartItem {
+    _id: Types.ObjectId;
     product: {
+        _id: Types.ObjectId,
         name: string,
+        slug: string,
         image: string,
-        price: number;
-        oldPrice?: number;
-        discount?: number;
+        price: number,
+        oldPrice?: number,
+        discount?: number,
     },
-    color: Color,
-    size: Size,
+    color: string,
+    size: string,
     quantity: number;
 }

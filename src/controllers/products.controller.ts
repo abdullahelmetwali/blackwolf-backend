@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { startSession } from "mongoose";
+import mongoose, { startSession } from "mongoose";
 
 import { API_PORT } from "../config/env";
 import { Product } from "../types";
@@ -27,6 +27,17 @@ export const filterProucts = async (req: Request, res: Response, next: NextFunct
 
         const products = await PRODUCTS_MODEL.find(filter).lean();
         return res.status(200).json({ data: products });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getProduct = async (req: Request, res: Response, next: NextFunction) => {
+    const isId = mongoose.Types.ObjectId.isValid(req.params.identifier);
+    try {
+        const product = isId ? await PRODUCTS_MODEL.findById(req.params.identifier) : await PRODUCTS_MODEL.findOne({ slug: req.params.identifier });
+        if (!product) throw new Error("Product not found");
+        return res.status(200).json({ data: product });
     } catch (error) {
         next(error);
     }
@@ -90,7 +101,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         if (userCreatedProduct instanceof Error) throw new Error(userCreatedProduct.message);
 
         const imgURL = req.file && `${API_PORT}/${req?.file?.destination}${req?.file?.filename}`;
-
+        console.log(userCreatedProduct);
         const newProduct = await PRODUCTS_MODEL.create(
             [{
                 ...req.body,
@@ -98,8 +109,8 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
                 sizes: hasSizes.value,
                 colors: hasColors.value,
                 createdBy: {
-                    name: userCreatedProduct.name,
-                    email: userCreatedProduct.email
+                    name: userCreatedProduct ? userCreatedProduct.name : "Unknown",
+                    email: userCreatedProduct ? userCreatedProduct.email : "Unknown"
                 },
                 image: imgURL
             }],

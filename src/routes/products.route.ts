@@ -5,6 +5,7 @@ import { AUTH_MIDDLEWARE } from "../middlewares/auth.middleware";
 import { PRODUCTS_MODEL } from "../models/products.model";
 import {
     filterProucts,
+    getProduct,
     createProduct,
     hardDeleteProduct,
     restoreProduct,
@@ -16,6 +17,9 @@ const PRODUCTS_ROUTE = Router();
 
 // all products (not deleted) 
 PRODUCTS_ROUTE.get("/", filterProucts);
+
+// get product
+PRODUCTS_ROUTE.get("/:identifier", getProduct);
 
 // deleted products
 PRODUCTS_ROUTE.get("/deleted", AUTH_MIDDLEWARE, async (_, res) => {

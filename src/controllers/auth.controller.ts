@@ -13,19 +13,15 @@ import { GET_USER } from "../utils/get-user";
 export const logIn = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password } = req.body as UserTypo;
-        const user = await USERS_MODEL.findOne({ email });
-
-        let errors: Record<string, string> = {};
+        const user = await USERS_MODEL.findOne({ email }).select("+password");
 
         if (!user) {
-            errors.message = "Invalid email or password";
-            throw new CustomValidationError(409, errors);
+            throw new CustomValidationError(409, { message: "Invalid email or password" });
         };
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            errors.message = "Invalid email or password";
-            throw new CustomValidationError(409, errors);
+            throw new CustomValidationError(409, { message: "Invalid email or password" });
         };
 
         if (!JWT_SECRET) {
@@ -53,7 +49,7 @@ export const logIn = async (req: Request, res: Response, next: NextFunction) => 
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { email, name, password, phone, role, gender, } = req.body as UserTypo;
+        const { email, firstName, lastName, password, phone, role, gender, } = req.body as UserTypo;
 
         // check if user exists , to avoid making the whole logic
         const isExisting = await USERS_MODEL.findOne({ email, phone });
@@ -77,32 +73,30 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         const createdUser = await GET_USER(req) || null;
 
         const newUser = await USERS_MODEL.create({
-            name: name,
+            firstName: firstName,
+            lastName: lastName,
             email: email,
             phone: String(phone),
             role: role,
             password: hashedPassword,
-            ...(createdUser instanceof Error || !createdUser ? {} : {
-                createdBy: {
-                    name: createdUser.name,
-                    email: createdUser.email
-                }
-            })
+            createdBy: {
+                name: (createdUser instanceof Error || !createdUser) ? "Unknown" : createdUser.fullName,
+                email: (createdUser instanceof Error || !createdUser) ? "Unknown" : createdUser.email
+            }
         });
+
         if (!newUser || !JWT_SECRET || !JWT_EXPIRES_IN) {
             throw new Error("User creation failed");
         };
 
         const token = jwt.sign(
-            { userId: newUser.id, role: role },
+            { userId: newUser._id, role: role },
             JWT_SECRET,
             // expires in seconds
             { expiresIn: Number(JWT_EXPIRES_IN) || 3600 }
         );
 
         const userObject = newUser.toObject();
-        delete (userObject as any).password;
-
         return res.status(201).json({
             data: {
                 token,
