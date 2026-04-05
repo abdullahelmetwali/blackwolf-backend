@@ -26,7 +26,7 @@ export const createSize = async (req: Request, res: Response, next: NextFunction
         const newSize = await SIZES_MODEL.create({
             ...req.body,
             createdBy: {
-                name: userCreatedSize.name,
+                name: userCreatedSize.fullName,
                 email: userCreatedSize.email
             }
         });
@@ -71,7 +71,7 @@ export const updateSize = async (req: Request, res: Response, next: NextFunction
         thisSize.set({
             name: name,
             status: status,
-            updatedBy: userUpdatedSize.name
+            updatedBy: userUpdatedSize.fullName
         });
 
         // save this size new data after checking all data 

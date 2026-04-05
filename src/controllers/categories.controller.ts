@@ -29,7 +29,7 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
         const newCategory = await CATEGORIES_MODEL.create({
             ...req.body,
             createdBy: {
-                name: userCreatedCategory.name,
+                name: userCreatedCategory.fullName,
                 email: userCreatedCategory.email
             }
         });
@@ -69,7 +69,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
 
         thisCategory.set({
             name: name,
-            updatedBy: userUpdatedCategory.name
+            updatedBy: userUpdatedCategory.fullName
         })
 
         // save this Category new data after checking all data 

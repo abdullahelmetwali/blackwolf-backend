@@ -109,7 +109,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
                 sizes: hasSizes.value,
                 colors: hasColors.value,
                 createdBy: {
-                    name: userCreatedProduct ? userCreatedProduct.name : "Unknown",
+                    name: userCreatedProduct ? userCreatedProduct.fullName : "Unknown",
                     email: userCreatedProduct ? userCreatedProduct.email : "Unknown"
                 },
                 image: imgURL
@@ -213,7 +213,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
             colors: hasColors.value.map(c => ({ _id: c._id, name: c.name })),
             sizes: hasSizes.value.map(s => ({ _id: s._id, name: s.name })),
             categories: hasCategories.value.map(ct => ({ _id: ct._id, name: ct.name })),
-            updatedBy: userUpdatedProduct?.name
+            updatedBy: userUpdatedProduct?.fullName
         });
 
         await thisProduct.save();
